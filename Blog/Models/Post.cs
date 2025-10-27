@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Blog.Models
 {
@@ -17,12 +18,15 @@ namespace Blog.Models
         public string Author { get; set; }
         [DataType(DataType.Date)]
         public DateTime PublishedDate { get; set; } = DateTime.Now;
+        [ValidateNever]
         public string FeatureImageUrl { get; set; }
 
         // Navigation property for Category
         [ForeignKey("Category")]
         public int CategoryId { get; set; }
+        [ValidateNever]
         public Category Category { get; set; }
+        [ValidateNever]
         // Navigation property for Comments
         public ICollection<Comment> Comments { get; set; }
 
