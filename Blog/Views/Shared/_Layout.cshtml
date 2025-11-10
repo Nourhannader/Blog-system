@@ -6,12 +6,13 @@
     <title>@ViewData["Title"] - Blog</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/Bootswatch/bootstrap.min.css" />
+    <link href="~/css/style.css" rel="stylesheet" />
 </head>
 <body>
     <header>
         ﻿<nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-action="Index">SyncSyntax</a>
+                <a class="navbar-brand" asp-action="Index">Notelytic</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -23,6 +24,23 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-outline-light btn-login me-2" asp-controller="Account" asp-action="SignOut">SignOut</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="btn btn-outline-light btn-login me-2" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-outline-light btn-login me-2" asp-controller="Account" asp-action="LogIn">LogIn</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

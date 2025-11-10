@@ -20,7 +20,7 @@ namespace Blog.Models
         public string Content { get; set; }
         [ForeignKey("Post")]
         public int PostId { get; set; }
-        
+        [ValidateNever]
         public Post Post { get; set; }
     }
 }

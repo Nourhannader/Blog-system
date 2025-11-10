@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Blog.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authorization;
+using Blog.Models;
 
 
 namespace Blog.Controllers
@@ -173,11 +175,55 @@ namespace Blog.Controllers
             var postsQuery = context.Posts.Include(p =>p.Category).AsQueryable();
             if (categoryId.HasValue)
             {
-                postsQuery = postsQuery.Where(p => p.CategoryId == categoryId.Value);
+                postsQuery = postsQuery.Take(6).Where(p => p.CategoryId == categoryId.Value).OrderBy(p => p.PublishedDate);
             }
             var posts = postsQuery.ToList();
             ViewData["Categories"]=context.Categories.ToList();
             return View(posts);
+        }
+
+        [HttpPost]
+        //[Authorize(Roles = "Admin,User")]
+        public JsonResult AddComment([FromBody] Comment comment)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new { success = false, message = "Invalid data" });
+            }
+
+            
+            comment.UserName = User.Identity.Name;
+
+            comment.CommentDate = DateTime.Now;
+
+            context.Comments.Add(comment);
+            context.SaveChanges();
+
+            return Json(new
+            {
+                success = true,
+                userName = comment.UserName,
+                commentDate = comment.CommentDate.ToString("MMMM dd, yyyy"),
+                content = comment.Content
+            });
+        }
+
+
+        [HttpPost]
+        //[Authorize(Roles = "Admin,User")]
+        public JsonResult DeleteComment(int id)
+        {
+            var comment = context.Comments.FirstOrDefault(c => c.Id == id);
+
+            if (comment == null)
+            {
+                return Json(new { success = false, message = "Comment not found" });
+            }
+
+            context.Comments.Remove(comment);
+            context.SaveChanges();
+
+            return Json(new { success = true });
         }
         private async Task<string> ProcessUploadedFile(IFormFile file)
         {
