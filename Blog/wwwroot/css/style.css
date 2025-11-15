@@ -2,3 +2,46 @@
     background-color: white;
     color: #375a7f;
 }
+
+.navbar-nav {
+    flex-direction: row !important;
+    gap: .75rem;
+}
+
+    .navbar-nav .nav-item {
+        list-style: none;
+    }
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24
+}
+.bg-card {
+    background-color: #454545;
+}
+.category-link {
+    position: relative;
+    text-decoration: none;
+    color: #e4e7ed;
+    font-weight: 500;
+}
+
+    .category-link::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -3px;
+        width: 0;
+        height: 2px;
+        background-color: #c9cfd5;
+        transition: width 0.3s;
+    }
+
+    .category-link:hover::after {
+        width: 100%;
+    }
+
+    .category-link:hover {
+        color: #c9cfd5;
+    }
+
+

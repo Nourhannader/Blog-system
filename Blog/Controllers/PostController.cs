@@ -172,13 +172,16 @@ namespace Blog.Controllers
         [HttpGet]
         public IActionResult Index(int? categoryId)
         {
-            var postsQuery = context.Posts.Include(p =>p.Category).AsQueryable();
+            var postsQuery = context.Posts.Include(p => p.Category).AsQueryable();
             if (categoryId.HasValue)
             {
-                postsQuery = postsQuery.Take(6).Where(p => p.CategoryId == categoryId.Value).OrderBy(p => p.PublishedDate);
+                postsQuery = postsQuery.Where(p => p.CategoryId == categoryId.Value);
             }
             var posts = postsQuery.ToList();
-            ViewData["Categories"]=context.Categories.ToList();
+
+            // Fixing the syntax errors in the assignment to ViewData["Categories"]
+            ViewData["Categories"] = context.Categories.ToList();
+
             return View(posts);
         }
 

@@ -15,7 +15,7 @@ namespace Blog.Controllers
         [HttpGet]
         public IActionResult create()
         {
-            return View();
+            return PartialView("create");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

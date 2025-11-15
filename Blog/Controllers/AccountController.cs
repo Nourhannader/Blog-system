@@ -1,4 +1,5 @@
-﻿using Blog.Data;
+﻿using System.Security.Claims;
+using Blog.Data;
 using Blog.Models;
 using Blog.ViewModels;
 using Microsoft.AspNetCore.Identity;
@@ -42,7 +43,7 @@ namespace Blog.Controllers
                 if (!allowedExtensions.Contains(fileExtension))
                 {
                     ModelState.AddModelError("FeatureImage", "Invalid image format. Allowed formats are: " + string.Join(", ", allowedExtensions));
-                    
+
                     return View(registerUser);
                 }
                 string imageUrl = null;
@@ -64,7 +65,12 @@ namespace Blog.Controllers
                         var role = new IdentityRole("User");
                         await roleManager.CreateAsync(role);
                     }
+
                     await userManager.AddToRoleAsync(user, "User");
+
+                    // Fix: Correctly add the claim with the image URL as a string
+                    await userManager.AddClaimAsync(user, new Claim("ProfilePictureUrl", imageUrl ?? string.Empty));
+
                     await signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Post");
                 }

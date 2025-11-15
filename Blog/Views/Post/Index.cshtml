@@ -1,7 +1,194 @@
 ﻿@model IEnumerable<Post>
 @{
-	ViewData["Title"] = "Blog Posts";
+    ViewData["Title"] = "Blog Posts";
+    var picture = User.FindFirst("ProfilePictureUrl")?.Value;
+    var imgSrc = !string.IsNullOrEmpty(picture)
+                 ? Url.Content("~/images/" + picture)
+                 : Url.Content("~/images/defaultprofile.jpg");
 }
+
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <aside class="hidden lg:block lg:col-span-3">
+        <div class="sticky top-24 space-y-6">
+            <div class="bg-card p-4 rounded-lg shadow-sm">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-light-secondary dark:text-text-dark-secondary">search</span>
+                    <input id="searchBox" class="w-full bg-background-light dark:bg-background-dark border-none rounded-full pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary text-text-light-primary dark:text-text-dark-primary" placeholder="Search Content" type="text" />
+                </div>
+            </div>
+            <div class="bg-card p-4 rounded-lg shadow-sm space-y-4">
+                <div>
+                    <h3 class="text-xs font-bold text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wider mb-4">Categories</h3>
+                    <ul class="space-y-3">
+                        @if (ViewBag.Categories != null)
+                        {
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                <li>
+                                    <a asp-controller="Post" asp-action="Index" asp-route-categoryId="@category.Id"
+                                       class="category-link">
+                                        @category.Name
+                                    </a>
+                                </li>
+                            }
+                            <li>
+                                <a asp-controller="Post" asp-action="Index" 
+                                   class="category-link">
+                                   All
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <div class="lg:col-span-6 space-y-6">
+        @if (Model.Any())
+        {
+            <p>no posts</p>
+        }
+        else
+        {
+            <div class="bg-card p-6 rounded-lg shadow-sm">
+                <div class="flex items-start justify-between">
+                    <div class="flex items-center gap-3">
+                        <img alt="Naomi Yashida avatar" class="w-12 h-12 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSwPdCEOZnCOb_O9xoIroPTRw4Nqhoy8ATNSvh0UyuLtlr713UWgjfOQj4DBhlvrqwp6cuUGPlswSp7B_oiXLMUT4adx_kAJgFlPbSMHCYJCOfoxHjlqFM0jcim6d4ZAzTPoCfVDtCWMSH-dmc-ZA3LuuWDJhtVJcvXMEtPrFeQMMyGShjgTJh9LVZHMyjdO0svsg8oSuuOzwr4p4eyyVPS6GyCqWzYRuFBjEQzaLgUhzEpCdc5nrE0mgM3JX9Btj8VMEJU6eyAR0" />
+                        <div>
+                            <p class="font-bold text-text-light-primary dark:text-text-dark-primary">Naomi Yashida</p>
+                            <p class="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">location_on</span>
+                                Charlottetown <span class="mx-1">·</span> 3 hours ago
+                            </p>
+                        </div>
+                    </div>
+                    <button class="text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary">
+                        <span class="material-symbols-outlined">more_horiz</span>
+                    </button>
+                </div>
+                <div class="mt-4 text-text-light-primary dark:text-text-dark-primary text-sm space-y-3">
+                    <p>More effort is wasted doing things that don't matter than is wasted doing things inefficiently. And if that is the case, elimination is a more useful skill than optimization. I am reminded of the famous Peter Drucker quote, "There is nothing so useless as doing efficiently that which should not be done at all."</p>
+                    <p class="text-primary font-medium">
+                        @* <a class="hover:underline" href="#">#Tips</a> categoryName *@
+                        <a class="hover:underline" href="#">#ProductivityHacks</a>
+                        <a class="hover:underline" href="#">#SelfDev</a>
+                    </p>
+                </div>
+                <div class="mt-4 flex items-center justify-between text-text-light-secondary dark:text-text-dark-secondary text-sm">
+                    <div class="flex items-center gap-4">
+                        <button class="flex items-center gap-2 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-xl">chat_bubble_outline</span>
+                            31 Comments
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-border-light dark:border-border-dark space-y-4">
+                    <div class="flex items-start gap-3">
+                        <img alt="Salahudin profile picture" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDflACUSMB-jhWpFTGLVvqLhyZEQkV3qWhzRygLHXkqjh1OaftvRj0rLHhpBAxbnP8fGR1y148dRkBMZ-MHbj_FZVMdrvCoapZWIuqw0T9yH3PzsHif--3fYG72f8AieUT2PRKGJ05iwdi4Q3VfMrx60ciVxSNaITL9Jf3DMWFyJV3nK12cTmnwuZmqrHS3a31DJj210czjCj5Xkmvt9K6MxtFUrqAES-dHdIQhEYAXpkJP1uML2W3KYZG1Km16QgVLPxkRVBPaaXk" />
+                        <input class="w-full bg-background-light dark:bg-background-dark border-none rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-primary text-text-light-primary dark:text-text-dark-primary" placeholder="Write your comment" type="text" />
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <img alt="Ismail bin Mail avatar" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4nwX2p9QSskwnChFiPiyircq65eCEBgfgnAVTspVOn5r_YLfE3TAmNt_Mh-BkkKVBCXXRMHzmoFBav82akTgUhJE-v9vbGMAr29DCnBBuJUdbUiG44h1EgpKCOutyoovXXLQwyxf3yK5zxDk11aE02KjdxSYgMl_i-tFtP406rL_nyFctmwvmgRyLWBNJQZEc6IB2m4JiIJRjjM6dA818lKNJwOm_eTP7vsOg8GtQAbL11WLOhr56gTjTRBhqWMXYFJlE3myV3rw" />
+                        <div class="bg-background-light dark:bg-background-dark p-3 rounded-lg w-full">
+                            <div class="flex items-center gap-2">
+                                <p class="font-semibold text-sm text-text-light-primary dark:text-text-dark-primary">Ismail bin Mail</p>
+                                <p class="text-xs text-text-light-secondary dark:text-text-dark-secondary">2h</p>
+                            </div>
+                            <p class="text-sm text-text-light-primary dark:text-text-dark-primary mt-1">I am reminded of the famous Peter Drucker quote, "There is nothing so useless as doing efficiently that which should not be done at all."</p>
+                        
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 text-center">
+                    <button class="text-sm font-semibold text-primary hover:underline">View All Comments</button>
+                </div>
+            </div>
+        }
+    </div>
+    <aside class="hidden lg:block lg:col-span-3">
+        <div class="sticky top-24 space-y-6">
+
+            <div class="bg-card rounded-lg shadow-sm text-center">
+                <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded-t-lg relative">
+                    <img alt="Profile banner" class="w-full h-full object-cover rounded-t-lg" src="~/images/blogging.jpg" />
+                    <img alt="User profile picture"
+                         class="w-20 h-20 rounded-full object-cover absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 border-4 border-card-light dark:border-card-dark"
+                         src="@imgSrc" />
+                </div>
+
+                <div class="pt-12 pb-6 px-6">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <h3 class="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">@User.Identity.Name</h3>
+                        <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary">
+                            Welcome back 👋
+                        </p>
+
+                        <button class="mt-6 w-full bg-primary text-white font-semibold py-2.5 rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                                onclick="location.href='@Url.Action("Create", "Post")'">
+                            <span class="material-symbols-outlined text-xl">add_circle</span>
+                            Create Post
+                        </button>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <button class="mt-3 w-full bg-green-600 text-white font-semibold py-2.5 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                                    onclick="openCategoryModal()">
+                                <span class="material-symbols-outlined text-xl">category</span>
+                                Add Category
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <h3 class="font-bold text-lg text-text-light-primary dark:text-text-dark-primary">Guest</h3>
+                        <p class="text-sm text-text-light-secondary dark:text-text-dark-secondary mb-4">
+                            Please log in to create posts
+                        </p>
+                        <button class="mt-2 w-full bg-gray-400 text-white font-semibold py-2.5 rounded-lg cursor-not-allowed flex items-center justify-center gap-2" disabled>
+                            <span class="material-symbols-outlined text-xl">block</span>
+                            Create Post
+                        </button>
+                    }
+                </div>
+            </div>
+            <div class="bg-card-light dark:bg-card-dark p-5 rounded-lg shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xs font-bold text-text-light-secondary dark:text-text-dark-secondary uppercase tracking-wider">Topics you follow</h3>
+                    <button class="text-text-light-secondary dark:text-text-dark-secondary hover:text-primary"><span class="material-symbols-outlined text-xl">tune</span></button>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">Design <button class="text-text-light-secondary dark:text-text-dark-secondary text-sm">×</button></span>
+                    <span class="bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">User Experience <button class="text-text-light-secondary dark:text-text-dark-secondary text-sm">×</button></span>
+                    <span class="bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">UI <button class="text-text-light-secondary dark:text-text-dark-secondary text-sm">×</button></span>
+                    <span class="bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">Photoshop <button class="text-text-light-secondary dark:text-text-dark-secondary text-sm">×</button></span>
+                    <span class="bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">Viral <button class="text-text-light-secondary dark:text-text-dark-secondary text-sm">×</button></span>
+                    <span class="bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">Illustration <button class="text-text-light-secondary dark:text-text-dark-secondary text-sm">×</button></span>
+                    <span class="bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">Print Design <button class="text-text-light-secondary dark:text-text-dark-secondary text-sm">×</button></span>
+                    <span class="bg-background-light dark:bg-background-dark text-text-light-primary dark:text-text-dark-primary text-xs font-medium px-2 py-1 rounded-md flex items-center gap-1">Productivity <button class="text-text-light-secondary dark:text-text-dark-secondary text-sm">×</button></span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+</div>
+
+<div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-3">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="categoryModalBody">
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+@* //////////////////// *@
 
 <div class="text-center m-3">
 	@if (ViewBag.Categories != null)
@@ -50,3 +237,26 @@
         </div>
 	}
 </div>
+<script>
+    document.getElementById('searchBox').addEventListener('input', function() {
+        const query = this.value.toLowerCase();
+        document.querySelectorAll('.post-item').forEach(post => {
+            const title = post.dataset.title.toLowerCase();
+            const content = post.dataset.content.toLowerCase();
+            post.style.display = title.includes(query) || content.includes(query)
+                ? 'block' : 'none';
+        });
+    });
+</script>
+<script>
+    function openCategoryModal() {
+        $.ajax({
+            url: '@Url.Action("Create", "Category")',
+            type: 'GET',
+            success: function(result) {
+                $("#categoryModalBody").html(result);
+                $("#categoryModal").modal("show");
+            }
+        });
+    }
+</script>
