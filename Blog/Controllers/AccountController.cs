@@ -94,6 +94,7 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
+                
                 var user = await userManager.FindByEmailAsync(logInUser.Email);
                 if (user == null)
                 {
@@ -163,6 +164,7 @@ namespace Blog.Controllers
                         await roleManager.CreateAsync(role);
                     }
                     await userManager.AddToRoleAsync(user, "Admin");
+                    await userManager.AddClaimAsync(user, new Claim("ProfilePictureUrl", imageUrl ?? string.Empty));
                     await signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Post");
                 }

@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <link rel="stylesheet" href="~/lib/Bootswatch/bootstrap.min.css" />
     <link href="~/css/style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" integrity="sha512-t7Few9xlddEmgd3oKZQahkNI4dS6l80+eGEzFQiqtyVYdvcSG2D3Iub77R20BdotfRPA9caaRkg1tyaJiPmO0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
 </head>
 <body>
@@ -36,7 +37,7 @@
                         <div class="hidden sm:ml-6 sm:block">
                             <div class="flex space-x-4">
                                 <!-- Current: "bg-gray-900 dark:bg-gray-950/50 text-white", Default: "text-gray-300 hover:bg-white/5 hover:text-white" -->
-                                <a aria-current="page" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white dark:bg-gray-950/50" asp-area="" asp-controller="Post" asp-action="Index">Blogs</a>
+                                @* <a aria-current="page" class="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white dark:bg-gray-950/50" asp-area="" asp-controller="Post" asp-action="Index">Blogs</a> *@
                             </div>
                         </div>
                     </div>
@@ -64,7 +65,7 @@
             <el-disclosure id="mobile-menu" hidden class="block sm:hidden">
                 <div class="space-y-1 px-2 pt-2 pb-3">
                     <!-- Current: "bg-gray-900 dark:bg-gray-950/50 text-white", Default: "text-gray-300 hover:bg-white/5 hover:text-white" -->
-                    <a aria-current="page" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white dark:bg-gray-950/50" asp-area="" asp-controller="Post" asp-action="Index">Blogs</a>
+                    @* <a aria-current="page" class="block rounded-md bg-gray-900 px-3 py-2 text-base font-medium text-white dark:bg-gray-950/50" asp-area="" asp-controller="Post" asp-action="Index">Blogs</a> *@
                    
                 </div>
             </el-disclosure>

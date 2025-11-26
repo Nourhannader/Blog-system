@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Authorization;
 using Blog.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 
 namespace Blog.Controllers
@@ -14,13 +16,15 @@ namespace Blog.Controllers
     {
 
         private readonly AppDbContext context;
+        private readonly UserManager<AppUser> userManager;
         private readonly IWebHostEnvironment webHostEnvironment;
         private readonly string[] allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
 
-        public PostController(AppDbContext context, IWebHostEnvironment webHostEnvironment)
+        public PostController(AppDbContext context, IWebHostEnvironment webHostEnvironment, UserManager<AppUser> userManager)
         {
             this.context = context;
             this.webHostEnvironment = webHostEnvironment;
+            this.userManager = userManager;
         }
 
         [HttpGet]
@@ -39,18 +43,33 @@ namespace Blog.Controllers
         {
             if (ModelState.IsValid)
             {
-                var fileExtension = Path.GetExtension(post.FeatureImage.FileName).ToLower();
-                if (!allowedExtensions.Contains(fileExtension))
+              
+                // Get logged-in user ID
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var postDb = new Post()
                 {
-                    ModelState.AddModelError("FeatureImage", "Invalid image format. Allowed formats are: " + string.Join(", ", allowedExtensions));
-                    post.Categories = new SelectList(context.Categories.ToList(), "Id", "Name");
-                    return View(post);
-                }
+                    Title = post.Title,
+                    Content = post.Content.Trim(),
+                    userId = userId,
+                    CategoryId = post.CategoryId
+                };
+                
                 if (post.FeatureImage != null)
                 {
-                    post.Post.FeatureImageUrl = await ProcessUploadedFile(post.FeatureImage);
+                    var fileExtension = Path.GetExtension(post.FeatureImage.FileName).ToLower();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        ModelState.AddModelError("FeatureImage", "Invalid image format. Allowed formats are: " + string.Join(", ", allowedExtensions));
+                        post.Categories = new SelectList(context.Categories.ToList(), "Id", "Name");
+                        return View(post);
+                    }
+                    if (post.FeatureImage != null)
+                    {
+                        postDb.FeatureImageUrl = await ProcessUploadedFile(post.FeatureImage);
+                    }
                 }
-                context.Posts.Add(post.Post);
+
+                context.Posts.Add(postDb);
                 await context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
@@ -68,55 +87,55 @@ namespace Blog.Controllers
             }
             var postviewodel = new PostViewModel()
             {
-                Post = post,
+                
                 Categories = new SelectList(context.Categories.ToList(), "Id", "Name", post.CategoryId)
             };
             return View(postviewodel);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit( PostViewModel postViewModel)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(postViewModel);
-            }
+        //public async Task<IActionResult> Edit( int id, PostViewModel postViewModel)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return View(postViewModel);
+        //    }
 
-            var postFromDb = await context.Posts.AsNoTracking().FirstOrDefaultAsync(
-                p => p.Id == postViewModel.Post.Id);
+        //    var postFromDb = await context.Posts.AsNoTracking().FirstOrDefaultAsync(
+        //        p => p.Id == id);
 
-            if (postFromDb == null)
-            {
-                return NotFound();
-            }
+        //    if (postFromDb == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            if (postViewModel.FeatureImage != null)
-            {
-                var inputFileExtension = Path.GetExtension(postViewModel.FeatureImage.FileName).ToLower();
-                bool isAllowed = allowedExtensions.Contains(inputFileExtension);
-                if (!isAllowed)
-                {
-                    ModelState.AddModelError("Image", "Invalid image format. Allowed formats are .jpg, .jpeg, .png");
-                    return View(postViewModel);
-                }
+        //    if (postViewModel.FeatureImage != null)
+        //    {
+        //        var inputFileExtension = Path.GetExtension(postViewModel.FeatureImage.FileName).ToLower();
+        //        bool isAllowed = allowedExtensions.Contains(inputFileExtension);
+        //        if (!isAllowed)
+        //        {
+        //            ModelState.AddModelError("Image", "Invalid image format. Allowed formats are .jpg, .jpeg, .png");
+        //            return View(postViewModel);
+        //        }
 
-                var existingFilePath = Path.Combine(webHostEnvironment.WebRootPath, "images",
-                    Path.GetFileName(postFromDb.FeatureImageUrl));
-                if (System.IO.File.Exists(existingFilePath))
-                {
-                    System.IO.File.Delete(existingFilePath);
-                }
-                postViewModel.Post.FeatureImageUrl = await ProcessUploadedFile(postViewModel.FeatureImage);
-            }
-            else
-            {
-                postViewModel.Post.FeatureImageUrl = postFromDb.FeatureImageUrl;
-            }
+        //        var existingFilePath = Path.Combine(webHostEnvironment.WebRootPath, "images",
+        //            Path.GetFileName(postFromDb.FeatureImageUrl));
+        //        if (System.IO.File.Exists(existingFilePath))
+        //        {
+        //            System.IO.File.Delete(existingFilePath);
+        //        }
+        //        postViewModel.Post.FeatureImageUrl = await ProcessUploadedFile(postViewModel.FeatureImage);
+        //    }
+        //    else
+        //    {
+        //        postViewModel.Post.FeatureImageUrl = postFromDb.FeatureImageUrl;
+        //    }
 
-            context.Posts.Update(postViewModel.Post);
-            await context.SaveChangesAsync();
-            return RedirectToAction("Index");
-        }
+        //    context.Posts.Update(postViewModel.Post);
+        //    await context.SaveChangesAsync();
+        //    return RedirectToAction("Index");
+        //}
 
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
@@ -172,12 +191,19 @@ namespace Blog.Controllers
         [HttpGet]
         public IActionResult Index(int? categoryId)
         {
-            var postsQuery = context.Posts.Include(p => p.Category).AsQueryable();
+            var postsQuery = context.Posts
+                            .Include(p => p.Category)
+                            .Include(p=>p.Comments)
+                            .Include(p=> p.User)
+                            .OrderByDescending(p => p.PublishedDate)
+                            .AsQueryable();
             if (categoryId.HasValue)
             {
                 postsQuery = postsQuery.Where(p => p.CategoryId == categoryId.Value);
             }
             var posts = postsQuery.ToList();
+
+            
 
             // Fixing the syntax errors in the assignment to ViewData["Categories"]
             ViewData["Categories"] = context.Categories.ToList();
@@ -186,18 +212,22 @@ namespace Blog.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = "Admin,User")]
-        public JsonResult AddComment([FromBody] Comment comment)
+        [Authorize(Roles = "Admin,User")]
+        public async Task<JsonResult> AddComment(int postId, string content)
         {
-            if (!ModelState.IsValid)
+            if (string.IsNullOrWhiteSpace(content))
             {
-                return Json(new { success = false, message = "Invalid data" });
+                return Json(new { success = false, message = "Comment cannot be empty" });
             }
-
-            
-            comment.UserName = User.Identity.Name;
-
-            comment.CommentDate = DateTime.Now;
+            var user = await userManager.FindByNameAsync(User.Identity.Name);
+            var comment = new Comment()
+            {
+                Content = content,
+                PostId = postId,
+                UserName = user.UserName,
+                UserProfileImage=user.ProfilePictureUrl,
+                CommentDate = DateTime.Now
+            };
 
             context.Comments.Add(comment);
             context.SaveChanges();
@@ -206,7 +236,7 @@ namespace Blog.Controllers
             {
                 success = true,
                 userName = comment.UserName,
-                commentDate = comment.CommentDate.ToString("MMMM dd, yyyy"),
+                commentDate = comment.CommentDate.ToString("yyyy-MM-dd HH:mm"),
                 content = comment.Content
             });
         }

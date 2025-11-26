@@ -27,15 +27,15 @@
                             {
                                 <li>
                                     <a asp-controller="Post" asp-action="Index" asp-route-categoryId="@category.Id"
-                                       class="category-link">
+                                    class="category-link">
                                         @category.Name
                                     </a>
                                 </li>
                             }
                             <li>
                                 <a asp-controller="Post" asp-action="Index" 
-                                   class="category-link">
-                                   All
+                                class="category-link">
+                                    All
                                 </a>
                             </li>
                         }
@@ -45,65 +45,105 @@
         </div>
     </aside>
     <div class="lg:col-span-6 space-y-6">
-        @if (Model.Any())
+        @if (!Model.Any())
         {
-            <p>no posts</p>
+            <p>no posts to show</p>
         }
         else
         {
-            <div class="bg-card p-6 rounded-lg shadow-sm">
-                <div class="flex items-start justify-between">
-                    <div class="flex items-center gap-3">
-                        <img alt="Naomi Yashida avatar" class="w-12 h-12 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSwPdCEOZnCOb_O9xoIroPTRw4Nqhoy8ATNSvh0UyuLtlr713UWgjfOQj4DBhlvrqwp6cuUGPlswSp7B_oiXLMUT4adx_kAJgFlPbSMHCYJCOfoxHjlqFM0jcim6d4ZAzTPoCfVDtCWMSH-dmc-ZA3LuuWDJhtVJcvXMEtPrFeQMMyGShjgTJh9LVZHMyjdO0svsg8oSuuOzwr4p4eyyVPS6GyCqWzYRuFBjEQzaLgUhzEpCdc5nrE0mgM3JX9Btj8VMEJU6eyAR0" />
-                        <div>
-                            <p class="font-bold text-text-light-primary dark:text-text-dark-primary">Naomi Yashida</p>
-                            <p class="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm">location_on</span>
-                                Charlottetown <span class="mx-1">·</span> 3 hours ago
-                            </p>
+            @foreach (var post in Model)
+            {
+                <div class="bg-card p-6 rounded-lg shadow-sm mb-6">
+                    <!-- Author info -->
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center gap-3">
+                            <img class="w-12 h-12 rounded-lg object-cover"
+                            src="@(!string.IsNullOrEmpty(post.User.ProfilePictureUrl) ? "/images/" + post.User.ProfilePictureUrl : "/images/defaultprofile.jpg")"
+                            alt="@post.User.UserName avatar" />
+                            <div>
+                                <p class="font-bold text-text-light-primary dark:text-text-dark-primary">@post.User.UserName</p>
+                                <p class="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center gap-1">
+                                    <span class="mx-1">·</span> @post.PublishedDate.ToString("MMM dd, yyyy")
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <button class="text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary">
-                        <span class="material-symbols-outlined">more_horiz</span>
-                    </button>
-                </div>
-                <div class="mt-4 text-text-light-primary dark:text-text-dark-primary text-sm space-y-3">
-                    <p>More effort is wasted doing things that don't matter than is wasted doing things inefficiently. And if that is the case, elimination is a more useful skill than optimization. I am reminded of the famous Peter Drucker quote, "There is nothing so useless as doing efficiently that which should not be done at all."</p>
-                    <p class="text-primary font-medium">
-                        @* <a class="hover:underline" href="#">#Tips</a> categoryName *@
-                        <a class="hover:underline" href="#">#ProductivityHacks</a>
-                        <a class="hover:underline" href="#">#SelfDev</a>
-                    </p>
-                </div>
-                <div class="mt-4 flex items-center justify-between text-text-light-secondary dark:text-text-dark-secondary text-sm">
-                    <div class="flex items-center gap-4">
-                        <button class="flex items-center gap-2 hover:text-primary transition-colors">
-                            <span class="material-symbols-outlined text-xl">chat_bubble_outline</span>
-                            31 Comments
+                        <button class="text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary">
+                            <span class="material-symbols-outlined">more_horiz</span>
                         </button>
                     </div>
-                </div>
-                <div class="mt-4 pt-4 border-t border-border-light dark:border-border-dark space-y-4">
-                    <div class="flex items-start gap-3">
-                        <img alt="Salahudin profile picture" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDflACUSMB-jhWpFTGLVvqLhyZEQkV3qWhzRygLHXkqjh1OaftvRj0rLHhpBAxbnP8fGR1y148dRkBMZ-MHbj_FZVMdrvCoapZWIuqw0T9yH3PzsHif--3fYG72f8AieUT2PRKGJ05iwdi4Q3VfMrx60ciVxSNaITL9Jf3DMWFyJV3nK12cTmnwuZmqrHS3a31DJj210czjCj5Xkmvt9K6MxtFUrqAES-dHdIQhEYAXpkJP1uML2W3KYZG1Km16QgVLPxkRVBPaaXk" />
-                        <input class="w-full bg-background-light dark:bg-background-dark border-none rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-primary text-text-light-primary dark:text-text-dark-primary" placeholder="Write your comment" type="text" />
+
+                    <!-- Post content -->
+                    <div class="mt-4 text-text-light-primary dark:text-text-dark-primary text-sm space-y-3">
+                        <p>@post.Content</p>
+                        <p class="text-primary font-medium">
+                            <a class="hover:underline" href="#">#@post.Category.Name</a>
+                        </p>
                     </div>
-                    <div class="flex items-start gap-3">
-                        <img alt="Ismail bin Mail avatar" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4nwX2p9QSskwnChFiPiyircq65eCEBgfgnAVTspVOn5r_YLfE3TAmNt_Mh-BkkKVBCXXRMHzmoFBav82akTgUhJE-v9vbGMAr29DCnBBuJUdbUiG44h1EgpKCOutyoovXXLQwyxf3yK5zxDk11aE02KjdxSYgMl_i-tFtP406rL_nyFctmwvmgRyLWBNJQZEc6IB2m4JiIJRjjM6dA818lKNJwOm_eTP7vsOg8GtQAbL11WLOhr56gTjTRBhqWMXYFJlE3myV3rw" />
-                        <div class="bg-background-light dark:bg-background-dark p-3 rounded-lg w-full">
-                            <div class="flex items-center gap-2">
-                                <p class="font-semibold text-sm text-text-light-primary dark:text-text-dark-primary">Ismail bin Mail</p>
-                                <p class="text-xs text-text-light-secondary dark:text-text-dark-secondary">2h</p>
-                            </div>
-                            <p class="text-sm text-text-light-primary dark:text-text-dark-primary mt-1">I am reminded of the famous Peter Drucker quote, "There is nothing so useless as doing efficiently that which should not be done at all."</p>
-                        
+
+                    <!-- Comments -->
+                    <div class="mt-4 flex items-center justify-between text-text-light-secondary dark:text-text-dark-secondary text-sm">
+                        <div class="flex items-center gap-4">
+                            <span class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-xl">chat_bubble_outline</span>
+                                @post.Comments.Count() Comments
+                            </span>
                         </div>
                     </div>
+                    <div class="mt-4 pt-4 border-t border-border-light dark:border-border-dark space-y-4">
+                        @if(User.Identity.IsAuthenticated){
+                            <div class="flex items-start gap-3">
+                                <img alt=" profile picture" class="w-8 h-8 rounded-full object-cover" src=@imgSrc />
+
+                                <form id="commentForm" method="post" asp-controller="Post" asp-action="AddComment" class=" w-full">
+
+                                    <!-- Hidden: Post ID -->
+                                    <input type="hidden" name="postId" value="@post.Id" />
+
+                                    <div class="relative w-full">
+                                        <input class="w-full bg-background-light dark:bg-background-dark border-none rounded-full px-4 py-2 pr-10 text-sm focus:ring-2 focus:ring-primary text-text-light-primary dark:text-text-dark-primary"
+                                        placeholder="Write your comment"
+                                        id="commentContent"
+                                        name="content"
+                                        type="text" />
+
+                                        <!-- Send Button -->
+                                        <button type="button"
+                                        id="sendCommentBtn"
+                                        class="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:text-primary-dark transition">
+                                            <i class="bi bi-send-fill"></i>
+                                        </button>
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        }
+                    </div>
+                    <div id="commentsList" class="mt-3">
+                        @if (post.Comments != null && post.Comments.Any())
+                        {
+                            var c = post.Comments.OrderByDescending(x => x.CommentDate).First();
+
+                            <div class="flex items-start gap-3 mb-4">
+                                <img src="@("/images/"+c.UserProfileImage)"
+                                     class="w-10 h-10 rounded-full object-cover" />
+
+                                <div class="bg-background-light dark:bg-background-dark p-3 rounded-lg w-full ">
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-semibold text-sm">@c.UserName</p>
+                                        <p class="text-xs text-gray-400">@c.CommentDate.ToShortTimeString()</p>
+                                    </div>
+
+                                    <p class="mt-1 text-sm">@c.Content</p>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+
+
                 </div>
-                <div class="mt-4 text-center">
-                    <button class="text-sm font-semibold text-primary hover:underline">View All Comments</button>
-                </div>
-            </div>
+            }
         }
     </div>
     <aside class="hidden lg:block lg:col-span-3">
@@ -188,55 +228,7 @@
     </div>
 </div>
 
-@* //////////////////// *@
 
-<div class="text-center m-3">
-	@if (ViewBag.Categories != null)
-	{
-		@foreach(var category in ViewBag.Categories)
-		{
-			<a asp-controller="Post" asp-action="Index" asp-route-categoryId="@category.Id" class="badge bg-light text-decoration-none  ms-2">@category.Name</a>
-		}
-	}
-
-</div>
-@if (User.IsInRole("Admin"))
-{
-	<div class="text-end my-2">
-		<a asp-action="Create" class="btn btn-primary rounded ">Create New Post</a>
-	</div>
-}
-<div class="row row-cols-1 row-cols-md-3 g-4">
-	@foreach(var post in Model)
-	{
-        <div class="col">
-            <div class="card h-100 border-0 shadow-lg rounded-1">
-                @* <div class="card h-100"> *@
-                <!-- Display Image or Default Image -->
-                <img src="@(!string.IsNullOrEmpty(post.FeatureImageUrl) ? "/images/" + post.FeatureImageUrl : "/images/default-image.jpg")"
-                     class="card-img-top"
-                     alt="@post.Title"
-                     style="height: 300px; object-fit: cover;" />
-
-                <div class="card-body">
-                    <h5 class="card-title">@post.Title</h5>
-                    <p class="text-muted mb-2">Published on @post.PublishedDate.ToString("MMMM dd, yyyy")</p>
-                    <p class="card-text">
-                        @(HtmlTagHelper.RemoveHtmlTags(post.Content).Length > 100 ? HtmlTagHelper.RemoveHtmlTags(post.Content).Substring(0, 100) + "..." : HtmlTagHelper.RemoveHtmlTags(post.Content))
-                    </p>
-                    <span class="badge bg-secondary">@post.Category?.Name</span>
-                </div>
-
-                <div class="card-footer d-flex justify-content-between align-items-center">
-                    <a asp-action="Detail" asp-route-id="@post.Id" class="btn btn-primary btn-sm">Read More</a>
-                    <div class="text-end">
-                        <small class="text-muted">By @post.Author</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-	}
-</div>
 <script>
     document.getElementById('searchBox').addEventListener('input', function() {
         const query = this.value.toLowerCase();
@@ -246,6 +238,16 @@
             post.style.display = title.includes(query) || content.includes(query)
                 ? 'block' : 'none';
         });
+    });
+
+    document.getElementById('sendCommentBtn').addEventListener('click',()=>{
+        var txt=document.getElementById("commentContent").value.trim();
+        if (txt.length === 0) {
+            alert("Comment cannot be empty!");
+            return;
+        }
+
+        document.getElementById("commentForm").submit();
     });
 </script>
 <script>
