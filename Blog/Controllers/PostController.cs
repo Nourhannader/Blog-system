@@ -87,67 +87,66 @@ namespace Blog.Controllers
             }
             var postviewodel = new PostViewModel()
             {
+                Id = post.Id,
+                Title = post.Title,
+                Content = post.Content,
+                CategoryId = post.CategoryId,
                 
                 Categories = new SelectList(context.Categories.ToList(), "Id", "Name", post.CategoryId)
             };
+            ViewBag.ExistingImage = post.FeatureImageUrl;
+
             return View(postviewodel);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit( int id, PostViewModel postViewModel)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return View(postViewModel);
-        //    }
-
-        //    var postFromDb = await context.Posts.AsNoTracking().FirstOrDefaultAsync(
-        //        p => p.Id == id);
-
-        //    if (postFromDb == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    if (postViewModel.FeatureImage != null)
-        //    {
-        //        var inputFileExtension = Path.GetExtension(postViewModel.FeatureImage.FileName).ToLower();
-        //        bool isAllowed = allowedExtensions.Contains(inputFileExtension);
-        //        if (!isAllowed)
-        //        {
-        //            ModelState.AddModelError("Image", "Invalid image format. Allowed formats are .jpg, .jpeg, .png");
-        //            return View(postViewModel);
-        //        }
-
-        //        var existingFilePath = Path.Combine(webHostEnvironment.WebRootPath, "images",
-        //            Path.GetFileName(postFromDb.FeatureImageUrl));
-        //        if (System.IO.File.Exists(existingFilePath))
-        //        {
-        //            System.IO.File.Delete(existingFilePath);
-        //        }
-        //        postViewModel.Post.FeatureImageUrl = await ProcessUploadedFile(postViewModel.FeatureImage);
-        //    }
-        //    else
-        //    {
-        //        postViewModel.Post.FeatureImageUrl = postFromDb.FeatureImageUrl;
-        //    }
-
-        //    context.Posts.Update(postViewModel.Post);
-        //    await context.SaveChangesAsync();
-        //    return RedirectToAction("Index");
-        //}
-
-        [HttpGet]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Edit(int id, PostViewModel postViewModel)
         {
-            var post = await context.Posts.FindAsync(id);
-            if (post == null)
+            if (!ModelState.IsValid)
+            {
+                postViewModel.Categories = new SelectList(context.Categories.ToList(), "Id", "Name", postViewModel.CategoryId);
+                return View(postViewModel);
+            }
+
+            var postFromDb = await context.Posts.AsNoTracking().FirstOrDefaultAsync(
+                p => p.Id == id);
+
+            if (postFromDb == null)
             {
                 return NotFound();
             }
-           
+
+            if (postViewModel.FeatureImage != null)
+            {
+                var inputFileExtension = Path.GetExtension(postViewModel.FeatureImage.FileName).ToLower();
+                bool isAllowed = allowedExtensions.Contains(inputFileExtension);
+                if (!isAllowed)
+                {
+                    ModelState.AddModelError("Image", "Invalid image format. Allowed formats are .jpg, .jpeg, .png");
+                    return View(postViewModel);
+                }
+
+                var existingFilePath = Path.Combine(webHostEnvironment.WebRootPath, "images",
+                    Path.GetFileName(postFromDb.FeatureImageUrl));
+                if (System.IO.File.Exists(existingFilePath))
+                {
+                    System.IO.File.Delete(existingFilePath);
+                }
+                postFromDb.FeatureImageUrl = await ProcessUploadedFile(postViewModel.FeatureImage);
+            }
+            else
+            {
+                postFromDb.FeatureImageUrl = postFromDb.FeatureImageUrl;
+            }
+            postFromDb.Content = postViewModel.Content;
+            postFromDb.PublishedDate = DateTime.Now;
+
+
+            context.Posts.Update(postFromDb);
+            await context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
+
 
         [HttpPost]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -169,17 +168,14 @@ namespace Blog.Controllers
             await context.SaveChangesAsync();
             return RedirectToAction("Index");
         }
-        [HttpPost]
-        public IActionResult cansel()
-        {
-            return RedirectToAction("Index");
-        }
+        
         [HttpGet]
         public IActionResult Details(int id)
         {
             var post = context.Posts
                 .Include(p => p.Category)
                 .Include(p => p.Comments)
+                .Include(p=> p.User)
                 .FirstOrDefault(p => p.Id == id);
             if (post == null)
             {
@@ -213,11 +209,11 @@ namespace Blog.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Admin,User")]
-        public async Task<JsonResult> AddComment(int postId, string content)
+        public async Task<IActionResult> AddComment(int postId, string content)
         {
             if (string.IsNullOrWhiteSpace(content))
             {
-                return Json(new { success = false, message = "Comment cannot be empty" });
+                return RedirectToAction("Index");
             }
             var user = await userManager.FindByNameAsync(User.Identity.Name);
             var comment = new Comment()
@@ -232,31 +228,30 @@ namespace Blog.Controllers
             context.Comments.Add(comment);
             context.SaveChanges();
 
-            return Json(new
-            {
-                success = true,
-                userName = comment.UserName,
-                commentDate = comment.CommentDate.ToString("yyyy-MM-dd HH:mm"),
-                content = comment.Content
-            });
+            return RedirectToAction("Index");
         }
 
 
         [HttpPost]
-        //[Authorize(Roles = "Admin,User")]
-        public JsonResult DeleteComment(int id)
+        [Authorize(Roles = "Admin,User")]
+        public IActionResult RemoveComment(int id)
         {
             var comment = context.Comments.FirstOrDefault(c => c.Id == id);
 
             if (comment == null)
             {
-                return Json(new { success = false, message = "Comment not found" });
+                return RedirectToAction("Index");
+            }
+            //check permission
+            if(User.Identity.Name != comment.UserName && !User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Index");
             }
 
             context.Comments.Remove(comment);
             context.SaveChanges();
 
-            return Json(new { success = true });
+            return RedirectToAction("Index");
         }
         private async Task<string> ProcessUploadedFile(IFormFile file)
         {

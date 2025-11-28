@@ -9,8 +9,8 @@ namespace Blog.ViewModels
 {
     public class PostViewModel
     {
-
-      
+        [ValidateNever]
+        public int Id { get; set; }
         [Required(ErrorMessage = "The Title is Required")]
         [MaxLength(200, ErrorMessage = "The Title cannot exceed 200 characters")]
         public string Title { get; set; }

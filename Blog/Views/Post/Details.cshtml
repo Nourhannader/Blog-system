@@ -1,0 +1,170 @@
+﻿@model Post
+@{
+    var picture = User.FindFirst("ProfilePictureUrl")?.Value;
+    var imgSrc = !string.IsNullOrEmpty(picture)
+                 ? Url.Content("~/images/" + picture)
+                 : Url.Content("~/images/defaultprofile.jpg");
+}
+<div class="bg-card w-75 mx-auto p-6 rounded-lg shadow-sm mb-6">
+    <!-- Author info -->
+    <div class="flex items-start justify-between">
+        <div class="flex items-center gap-3">
+            <img class="w-12 h-12 rounded-lg object-cover"
+                 src="@(!string.IsNullOrEmpty(Model.User.ProfilePictureUrl) ? "/images/" + Model.User.ProfilePictureUrl : "/images/defaultprofile.jpg")"
+                 alt="@Model.User.UserName avatar" />
+            <div>
+                <p class="font-bold text-text-light-primary dark:text-text-dark-primary">@Model.User.UserName</p>
+                <p class="text-xs text-text-light-secondary dark:text-text-dark-secondary flex items-center gap-1">
+                    <span class="mx-1">·</span> @Model.PublishedDate.ToString("MMM dd, yyyy")
+                </p>
+            </div>
+        </div>
+        <div>
+            @if (User.Identity.IsAuthenticated &&
+            (User.Identity.Name == Model.User.UserName || User.IsInRole("Admin")))
+            {
+                <button class="text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+
+                <button data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal"
+                                        data-id="@Model.Id" class="text-text-light-secondary dark:text-text-dark-secondary hover:text-text-light-primary dark:hover:text-text-dark-primary">
+                    <i class="bi bi-trash"></i>
+                </button>
+            }
+        </div>
+
+    </div>
+
+    <!-- Post content -->
+    <div class="mt-4 text-text-light-primary dark:text-text-dark-primary text-sm space-y-3">
+        <p>@Model.Content</p>
+        <img src="/images/@Model.FeatureImageUrl" alt="Postimage" class="rounded w-full h-96" />
+        <p class="text-primary font-medium">
+            <a class="hover:underline" asp-area="" asp-controller="Post" asp-action="Index" asp-route-categoryId="@Model.Category.Id">#@Model.Category.Name</a>
+        </p>
+    </div>
+
+    <!-- Comments -->
+    <div class="mt-4 flex items-center justify-between text-text-light-secondary dark:text-text-dark-secondary text-sm">
+        <div class="flex items-center gap-4">
+            <span class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-xl">chat_bubble_outline</span>
+                @Model.Comments.Count() Comments
+            </span>
+        </div>
+    </div>
+    <div class="mt-4 pt-4 border-t border-stone-500 space-y-4">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class="flex items-start gap-3">
+                <img alt=" profile picture" class="w-8 h-8 rounded-full object-cover" src=@imgSrc />
+
+                <form id="commentForm" method="post" asp-controller="Post" asp-action="AddComment" class=" w-full">
+
+                    <!-- Hidden: Post ID -->
+                    <input type="hidden" name="postId" value="@Model.Id" />
+
+                    <div class="relative w-full">
+                        <input class="w-full bg-background-light dark:bg-background-dark border-none rounded-full px-4 py-2 pr-10 text-sm focus:ring-2 focus:ring-primary text-text-light-primary dark:text-text-dark-primary"
+                               placeholder="Write your comment"
+                               id="commentContent"
+                               name="content"
+                               type="text" />
+
+                        <!-- Send Button -->
+                        <button type="button"
+                                id="sendCommentBtn"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 text-primary hover:text-primary-dark transition">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        }
+    </div>
+    <div id="commentsList" class="mt-3">
+        @if (Model.Comments != null && Model.Comments.Any())
+        {
+			foreach (var c in Model.Comments.OrderByDescending(x => x.CommentDate))
+			{
+
+             <div class=" flex items-start gap-3 mb-4">
+                <img src="@("/images/"+c.UserProfileImage)"
+                     class="w-10 h-10 rounded-full object-cover" />
+
+                <div class="bg-background-light dark:bg-neutral-700 p-3 rounded-lg w-full ">
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <p class="font-semibold text-sm">@c.UserName</p>
+                            <p class="text-xs text-gray-400">@c.CommentDate.ToShortTimeString()</p>
+                        </div>
+
+                        <!-- Show delete button if user is comment owner or Admin -->
+                        @if (User.Identity.IsAuthenticated &&
+                       (User.Identity.Name == c.UserName || User.IsInRole("Admin")))
+                        {
+                            <form method="post" asp-controller="Post" asp-action="RemoveComment" class="inline-block">
+                                <input type="hidden" name="id" value="@c.Id" />
+                                <button type="submit" class="text-red-500 text-xs hover:underline">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </form>
+
+                        }
+                    </div>
+
+                    <p class="mt-1 text-sm">@c.Content</p>
+                </div>
+            </div>
+            }
+        }
+        
+
+    </div>
+
+
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                Are you sure you want to delete this post?
+            </div>
+
+            <div class="modal-footer">
+                <form method="post" asp-action="DeleteConfirmed">
+                    <input type="hidden" id="deletePostId" name="id" />
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const deleteModal = document.getElementById("deleteModal");
+
+        deleteModal.addEventListener("show.bs.modal", function (event) {
+            let button = event.relatedTarget;
+            let postId = button.getAttribute("data-id");
+
+            document.getElementById("deletePostId").value = postId;
+        });
+    });
+</script>
