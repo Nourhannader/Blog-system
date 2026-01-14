@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Blog.Data;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Blog.Models
@@ -13,14 +14,18 @@ namespace Blog.Models
         public string Title { get; set; }
         [Required(ErrorMessage = "The Content is Required")]
         public string Content { get; set; }
-        [Required(ErrorMessage = "The Author is Required")]
-        [MaxLength(100, ErrorMessage = "The Author cannot exceed 100 characters")]
-        public string Author { get; set; }
+        
         [DataType(DataType.Date)]
         public DateTime PublishedDate { get; set; } = DateTime.Now;
         [ValidateNever]
         public string FeatureImageUrl { get; set; }
 
+        //Navigation property for user
+        [ValidateNever]
+        [ForeignKey("User")]
+        public string userId { get; set; }
+        [ValidateNever]
+        public AppUser User { get; set; }
         // Navigation property for Category
         [ForeignKey("Category")]
         public int CategoryId { get; set; }

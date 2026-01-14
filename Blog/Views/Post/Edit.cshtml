@@ -1,0 +1,80 @@
+﻿@model PostViewModel
+@{
+    ViewData["Title"] = "Edit Post";
+}
+
+<style>
+    .content-wrapper {
+        padding: 20px;
+        max-width: 1000px;
+        margin: 0 auto;
+        font-family: Arial, sans-serif;
+    }
+</style>
+
+<div class="content-wrapper">
+
+    <div class="row">
+        <div class="col-12 col-md-6">
+            <h2>Edit Post</h2>
+        </div>
+        <div class="col-12 col-md-6 text-end mb-2">
+            <a asp-action="Index" class="btn btn-primary">Back to List</a>
+        </div>
+    </div>
+
+    <hr />
+
+    <form asp-action="Edit" asp-controller="Post" method="post"  enctype="multipart/form-data">
+
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <input type="hidden" asp-for="Id" />
+        <!-- Title -->
+        <div class="form-group mb-3">
+            <label asp-for="Title"></label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <!-- Category -->
+        <div class="form-group mb-3">
+            <label asp-for="CategoryId"></label>
+            <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control">
+                <option value="">-- Select Category --</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="text-danger"></span>
+        </div>
+
+        <!-- Content -->
+        <div class="form-group mb-3">
+            <label asp-for="Content"></label>
+            <textarea id="editor" asp-for="Content" class="form-control" rows="6"></textarea>
+            <span asp-validation-for="Content" class="text-danger"></span>
+        </div>
+
+        <!-- Existing Image -->
+        @if (ViewBag.ExistingImage != null)
+        {
+            <div class="mb-3">
+                <label>Current Image:</label><br />
+                <img src="~/images/@ViewBag.ExistingImage" style="width:180px;height:180px;object-fit:cover;border-radius:10px;border:1px solid #ddd;" />
+            </div>
+        }
+
+        <!-- Upload New Image -->
+        <div class="form-group mb-3">
+            <label asp-for="FeatureImage" class="mb-2">Change Image</label>
+            <input asp-for="FeatureImage" type="file" class="form-control" />
+            <span asp-validation-for="FeatureImage" class="text-danger"></span>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn-success mt-2 mb-3">Update</button>
+        <a asp-action="Index" class="btn btn-secondary mt-2 mb-3">Cancel</a>
+
+    </form>
+
+</div>
+
+

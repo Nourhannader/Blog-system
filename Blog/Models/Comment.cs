@@ -9,9 +9,9 @@ namespace Blog.Models
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "User name is required.")]
-        [MaxLength(100, ErrorMessage = "User name cannot exceed 100 characters.")]
+        
         public string UserName { get; set; }
+        public string UserProfileImage { get; set; }
 
         [DataType(DataType.Date)]
         
@@ -20,7 +20,7 @@ namespace Blog.Models
         public string Content { get; set; }
         [ForeignKey("Post")]
         public int PostId { get; set; }
-        
+        [ValidateNever]
         public Post Post { get; set; }
     }
 }
